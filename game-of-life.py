@@ -1,10 +1,14 @@
 import os
 import random
+import time
 
 import numpy
 import pylab
 import imageio
 import glob
+
+from rich import print
+from rich import progress
 
 class GameOfLife:
 
@@ -19,6 +23,27 @@ class GameOfLife:
 		self.T = T # The maximum number of generations
 		self.render = render # Whether or not to render the animation, if not, it will just save the generations
 
+		# Try to clear console
+		try:
+			os.system('cls' if os.name == 'nt' else 'clear')
+		except:
+			pass
+		
+		# Check if "generations" folder exists, if not, create it
+		if not os.path.exists("generations"):
+			os.makedirs("generations")
+			print("[red]Generations folder was not found, so it was created[/red]")
+
+		print("""
+		_______________________________
+
+		Conway's [bold blue]Game of Life[/bold blue] 
+
+		By [i green]Dhravya Shah[/i green]
+
+		_______________________________
+		""")
+
 		# Set up a random initial configuration for the grid.
 		for i in range(0, self.N):
 			for j in range(0, self.N):
@@ -26,7 +51,8 @@ class GameOfLife:
 					self.old_grid[i][j] = 1
 				else:
 					self.old_grid[i][j] = 0
-		
+		print("[blue]Initialised the Game of life[/blue]", ":white_check_mark:")
+
 	def live_neighbours(self, i, j):
 		""" Count the number of live neighbours around point (i, j). """
 		s = 0 # The total number of live neighbours.
@@ -59,8 +85,7 @@ class GameOfLife:
 
 		t = 1 # Current time level
 		write_frequency = 5 # How frequently we want to output a grid configuration.
-		while t <= self.T: # Evolve!
-			print(f"At time level {t}")
+		for t in progress.track(range(0, self.N), description="Generating sequences ..."): # Evolve!
 
 			# Convay's Game of Life rules:
 			# 1. Any live cell with fewer than two live neighbours dies, as if caused by under-population/starvation.
@@ -90,9 +115,7 @@ class GameOfLife:
 			# The new configuration becomes the old configuration for the next generation.
 			self.old_grid = self.new_grid.copy()
 
-			# Move on to the next time level
-			t += 1
-
+		print("[green]Generations saved to folder generations[/green]", ":partying_face:")
 		if self.render:
 			self.animate_folder()
 
@@ -105,7 +128,8 @@ class GameOfLife:
 	def animate_folder():
 		"""Makes an animated gif from a folder of images."""
 		images = []
-		for filename in glob.glob('generations/*.png'):
+
+		for filename in progress.track(glob.glob('generations/*.png'), description="Rendering the animation :rocket: ..."):
 			images.append(imageio.imread(filename))
 
 		# Removing the first image as it is the wrong size.
@@ -114,11 +138,19 @@ class GameOfLife:
 		imageio.mimsave('animation.gif', images, 'GIF', duration=0.5)
 
 		# Delete all the images in generatinos folder.
-		for file in glob.glob('generations/*.png'):
-			os.remove(file)
+		try:
+			for file in progress.track(glob.glob('generations/*.png'), description="Attempting to delete the images ..."):
+				os.remove(file)
+		except:
+			print("[red]Error[/red] : Could not delete the images.")
 
 		# FIXME: Only works on windows.
+		print("[blue]Opening the animation[/blue]")
 		os.system("start animation.gif")
+
+		print("[green]Done![/green] :white_check_mark: Closing in 5 seconds. Thanks for checking out my project.")
+		time.sleep(5)
+
 		
 
 if __name__ == "__main__" :
