@@ -245,7 +245,7 @@ class GameOfLife:
 if __name__ == "__main__":
     # Calculate the time it takes to run the program.
     start_time = time.time()
-    game = GameOfLife(N=50, T=500, pattern="glider_gun", render=True)
+    game = GameOfLife(N=20, T=200, pattern="glider_gun", render=True)
     game.play()
     print(
         "[green]Time taken to run the program[/green]",
