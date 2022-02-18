@@ -160,7 +160,6 @@ class GameOfLife:
         pylab.savefig("generation0.png")
         pylab.savefig("generations/generation0.png")
 
-        t = 1  # Current time level
         # How frequently we want to output a grid configuration.
         write_frequency = 5
         for t in progress.track(
